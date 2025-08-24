@@ -1,4 +1,4 @@
-# Agentic AI LangGraph Learning Journey 🤖🔗
+# Agentic AI LangGraph Learning Journey
 
 Welcome to **Agentic_AI_LangGraph_Learning_Journey** 🚀  
 
@@ -6,7 +6,7 @@ This repository is dedicated to my **in-depth study and practice** of **Agentic 
 
 ---
 
-## 📚 Overview  
+##  Overview  
 
 The goal of this repository is to:
 - Learn and master **Agentic AI principles**  
@@ -17,7 +17,7 @@ The goal of this repository is to:
 
 ---
 
-## 🧩 Topics Covered  
+##  Topics Covered  
 
 This repo will gradually cover all important aspects of **Agentic AI with LangGraph**, including:
 
