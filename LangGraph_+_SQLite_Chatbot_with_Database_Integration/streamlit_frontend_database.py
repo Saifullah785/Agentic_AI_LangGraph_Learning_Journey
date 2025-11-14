@@ -66,3 +66,73 @@ for thread_id in st.session_state['chat_threads'][::-1]:
             temp_messages.append({'role': role, 'content': msg.content})
         st.session_state['messages_history'] = temp_messages
 
+# **************************************** Main UI ************************************
+
+# loading the conversation history
+for message in st.session_state['messages_history']:
+    with st.chat_message(message['role']):
+        st.text(message['content'])
+
+user_input = st.chat_input('Type here...')
+
+
+if user_input:
+
+    # first add the message to message history
+    st.session_state['messages_history'].append({'role': 'user', 'content': user_input})
+    with st.chat_message('user'):
+        st.text(user_input)
+
+
+    # CONFIG = {'configurable': {'thread_id': st.session_state['thread_id']}}
+
+    CONFIG = {
+        'configurable': {'thread_id': st.session_state['thread_id']},
+        'metadata': {
+            'thread_id': st.session_state['thread_id']
+
+        },
+        'run_name': 'chat_turn',
+        
+        }
+    
+    # first add the message to message history
+    with st.chat_message('assistant'):
+
+
+        ai_message = st.write_stream(
+            message_chunk.content for message_chunk, metadata in chatbot.stream(
+                messages=[HumanMessage(content=user_input)],
+                config=CONFIG,
+                stream_mode = 'messages'
+        )
+    )
+
+    st.session_state['messages_history'].append({'role': 'assistant', 'content': ai_message})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
