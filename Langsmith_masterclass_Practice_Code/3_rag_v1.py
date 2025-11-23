@@ -10,3 +10,27 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 
+
+load_dotenv() # expects openai api key in .env
+
+PDF_PATH = 'islr.pdf' # <--- change to your PDF filename
+
+# 1) Load PDF 
+loader = PyPDFLoader(PDF_PATH)
+docs = loader.load()
+
+# 2) chunk
+splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+splits = splitter.split_documents(docs)
+
+# 3) embed + index
+
+emb = OpenAIEmbeddings(model='text-embedding-3-small')
+vs = FAISS.from_documents(splits, emb)
+retriever = vs.as_retriever(search_type='similarity', search_kwargs={'k':4})
+
+# 4) Prompt
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Answer ONLY from the provided context. If not found, say you don't know."),
+    ("human", "Question: {question}\n\nContext:\n{context}")
+])
