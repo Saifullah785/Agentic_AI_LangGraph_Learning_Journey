@@ -34,3 +34,20 @@ prompt = ChatPromptTemplate.from_messages([
     ("system", "Answer ONLY from the provided context. If not found, say you don't know."),
     ("human", "Question: {question}\n\nContext:\n{context}")
 ])
+
+# 5) Chain
+llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)
+def format_docs(docs): return "\n\n".join([d.page_content for d in docs])
+
+parallel = RunnableParallel({
+    "context": retriever | RunnableLambda(format_docs),
+    "question": RunnablePassthrough()
+})
+chain = parallel | prompt | llm | StrOutputParser()
+
+# 6) Ask a questions
+
+print('PDF RAG ready. Ask a question (or Ctrl+c to exit).')
+q = input('\nQ:')
+ans = chain.invoke(q.strip())
+print('\nA:', ans)
