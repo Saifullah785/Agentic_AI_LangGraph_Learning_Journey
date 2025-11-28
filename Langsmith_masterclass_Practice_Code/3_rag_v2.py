@@ -49,3 +49,39 @@ def setup_pipeline(pdf_path: str):
     splits = split_documents(docs)
     vs = build_vectorstore(splits)
     return vs
+
+# ------------- pipeline -----------------
+llm = ChatOpenAI(model='gpt-4-mini', temperature=0)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Answer ONLY from the provided context. if not found,say not found, say you don't know."),
+    ("human", "Question: {question}\n\nContext:\n{context}")
+])
+
+def format_docs(docs):
+    return "\n\n".join([doc.page_content for doc in docs])
+
+
+# Build the index under traced setup
+vectorstore = setup_pipeline(PDF_PATH)
+retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+
+parallel = RunnableParallel({
+    "context": retriever | RunnableLambda(format_docs),
+    "question": RunnablePassthrough(),
+
+})
+
+chain = parallel | prompt | llm | StrOutputParser()
+
+# ------------- run a query (also traced )-----------------
+print('PDF RAG ready.ask a quesion (or ctrl + to exist).')
+q = input("\nQ: ").strip()
+
+# Give the visible run name + tags/metadata so it's easy to find:
+config = {
+    "run_name": "pdf_rag_query"
+
+}
+ans = chain.invoke(q, config=config)
+print("\nA:", ans)
