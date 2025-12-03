@@ -48,3 +48,40 @@ def build_vectorstore(split, embed_model_name, index_path: str):
     emb = OpenAIEmbeddings(model=embed_model_name)
 
     return FAISS.from_documents(split, emb)
+
+# ----------------- cache key / fingerprint -----------------
+
+def _file_fingerprint(path: str):
+
+    p = Path(path)
+    h = hashlib.sha256()
+    with p.open('rb') as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return {"sha256": h.hexdigest(), "size": p.stat().st_size, "mtime": int(p.stat().st_mtime)}
+
+def _index_key(pdf_path: str, chunk_size: int, chunk_overlap: int, embed_model_name: str) -> str:
+    meta = {
+        "pdf_fingerprint": _file_fingerprint(pdf_path),
+        "chunk_size": chunk_size,
+        "chunk_overlap": chunk_overlap,
+        "embedding_model": embed_model_name,
+        "format": "v1",
+    }
+    return hashlib.sha256(json.dumps(meta, sort_keys=True).encode("utf-8")).hexdigest()
+
+# ----------------- explicitly traced load/build runs -----------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
