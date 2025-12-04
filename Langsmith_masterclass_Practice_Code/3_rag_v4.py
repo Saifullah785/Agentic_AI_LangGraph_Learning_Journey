@@ -72,8 +72,31 @@ def _index_key(pdf_path: str, chunk_size: int, chunk_overlap: int, embed_model_n
 
 # ----------------- explicitly traced load/build runs -----------------
 
+@traceable(name='load_index', tags={'index'})
+def load_index(index_dir, Path, embed_model_name: str):
+    emb = OpenAIEmbeddings(model=embed_model_name)
+    return FAISS.load_local(
+        str(index_dir),
+        emb,
+        allow_dangerous_deserialization=True
+    )
 
 
+@traceable(name='build_index', tags={'index'})
+def build_index_run(pdf_path: str, chunk_size: int, chunk_overlap: int, embed_model_name: str, index_dir: Path):
+    docs = load_pdf(pdf_path)
+    splits = split_documents(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    vs = build_vectorstore(splits, embed_model_name)
+    index_dir.mkdir(parents=True, exist_ok=True)
+    vs.save_local(str(index_dir))
+    (index_dir / 'meta.json').write_text(json.dumps({
+        "pdf_path": os.path.abspath(pdf_path),
+        "chunk_size": chunk_size,
+        "chunk_overlap": chunk_overlap,
+        "embedding_model": embed_model_name,
+        "format": "v1",
+    }, indent=2))
+    return vs
 
 
 
