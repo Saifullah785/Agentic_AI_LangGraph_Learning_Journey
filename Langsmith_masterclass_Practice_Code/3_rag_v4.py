@@ -73,7 +73,7 @@ def _index_key(pdf_path: str, chunk_size: int, chunk_overlap: int, embed_model_n
 # ----------------- explicitly traced load/build runs -----------------
 
 @traceable(name='load_index', tags={'index'})
-def load_index(index_dir, Path, embed_model_name: str):
+def load_index_run(index_dir, Path, embed_model_name: str):
     emb = OpenAIEmbeddings(model=embed_model_name)
     return FAISS.load_local(
         str(index_dir),
@@ -98,7 +98,25 @@ def build_index_run(pdf_path: str, chunk_size: int, chunk_overlap: int, embed_mo
     }, indent=2))
     return vs
 
+# ----------------- dispatcher (not traced) -----------------
 
+def load_or_build_index(
+    pdf_path: str,
+    chunk_size: int = 1000,
+    chunk_overlap: int = 150,
+    embed_model_name: str = "text-embedding-3-small",
+    force_rebuild: bool = False,
+):
+    key = _index_key(pdf_path, chunk_size, chunk_overlap, embed_model_name)
+    index_dir = INDEX_ROOT / key
+    cache_hit = index_dir.exists() and not force_rebuild
+    if cache_hit:
+        return load_index_run(index_dir, embed_model_name)
+    else:
+        return build_index_run(pdf_path, chunk_size, chunk_overlap, embed_model_name, index_dir)
+    
+
+# ----------------- model, prompt and pipeline -----------------
 
 
 
