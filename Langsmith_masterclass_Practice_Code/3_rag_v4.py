@@ -118,7 +118,26 @@ def load_or_build_index(
 
 # ----------------- model, prompt and pipeline -----------------
 
+llm = ChatOpenAI(model="gpt-4-mini", temperature=0)
 
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Answer only from the provided context. if not found, say 'I don't know'."),
+    ("human", "Question: {question}\n\nContext:\n{context}")
+])
+
+def format_docs(docs):
+    return "\n\n".join(d.page_content for d in docs)
+
+@traceable(name="setup_pipeline", tags=["setup"])
+def setup_pipeline(pdf_path: str, chunk_size: 1000, chunk_overlap = 150, embed_model_name="text-embedding-3-small", force_rebuild=False):
+
+    return load_or_build_index(
+        pdf_path=pdf_path,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        embed_model_name=embed_model_name,
+        force_rebuild=force_rebuild,
+    )
 
 
 
