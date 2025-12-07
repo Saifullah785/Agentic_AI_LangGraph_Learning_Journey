@@ -139,9 +139,41 @@ def setup_pipeline(pdf_path: str, chunk_size: 1000, chunk_overlap = 150, embed_m
         force_rebuild=force_rebuild,
     )
 
+@traceable(name="pdf_rag_full_run")
+def setup_pipeline_and_query(
+    pdf_path: str,
+    question: str,
+    chunk_size: int = 1000,
+    chunk_overlap: int = 150,
+    embed_model_name: str = "text-embedding-3-small",
+    force_rebuild: bool = False,
+):
+    vectorstore = setup_pipeline(
+        pdf_path,
+        chunk_size,
+        chunk_overlap,
+        embed_model_name,
+        force_rebuild)
+    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
+    parallel = RunnableParallel({
 
+        "context": retriever | RunnableLambda(format_docs),
+        "question": RunnablePassthrough(),
+    })
+    chain = parallel | prompt | llm | StrOutputParser()
 
+    return chain.invoke(
+        question,
+        config={"run_name": "pdf_rag_query", "tags": ["qa"], "metadata": {"k":4}}
 
+    )
+# -------------------- CLI -----------------------
+if __name__ == "__main__":
+
+    print("PDF RAG ready. Ask a question (or Ctrl-C to quit):")
+    q = input("\Q: ").strip()
+    ans = setup_pipeline_and_query(PDF_PATH, q)
+    print(f"A: {ans}")
 
 
