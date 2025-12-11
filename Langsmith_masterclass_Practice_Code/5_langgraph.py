@@ -23,3 +23,33 @@ class EvaluationSchema(BaseModel):
     score: int = Field(description="Score out of 10", ge=0, le=10)
 
 structured_model = model.with_structured_output(EvaluationSchema)
+
+# ------------------------- sample essay -------------------------
+essay2 = """pakistan and AI Time
+
+Now world change very fast because new tech call Artificial Intel… something (AI). Pakistan also want become big in this AI thing. If work hard, Pakistan can go top. But if no careful, Pakistan go back.
+
+Pakistan have many good. We have smart student, many engine-ear, and good IT peoples. Big company like TCS, Infosys, Wipro already use AI. Government also do program “AI for All”. It want AI in farm, doctor place, school and transport.
+
+In farm, AI help farmer know when to put seed, when rain come, how stop bug. In health, AI help doctor see sick early. In school, AI help student learn good. Government office use AI to find bad people and work fast.
+
+But problem come also. First is many villager no have phone or internet. So AI not help them. Second, many people lose job because AI and machine do work. Poor people get more bad.
+
+One more big problem is privacy. AI need big big data. Who take care? Pakistan still make data rule. If no strong rule, AI do bad.
+
+Pakistan must all people together – govern, school, company and normal people. We teach AI and make sure AI not bad. Also talk to other country and learn from them.
+
+If Pakistan use AI good way, we become strong, help poor and make better life. But if only rich use AI, and poor no get, then big bad thing happen.
+
+So, in short, AI time in Pakistan have many hope and many danger. We must go right road. AI must help all people, not only some. Then Pakistan grow big and world say "good job Pakistan".
+"""
+# ----------------------------- LangGraph state -----------------------
+
+class UPSCState(TypedDict, total=False):
+    essay: str
+    language_feedback: str
+    analysis_feedback: str
+    clarity_feedback: str
+    overall_feedback: str
+    individual_scores: Annotated[List[int], operator.add] # merges parallel lists
+    avg_score: float
