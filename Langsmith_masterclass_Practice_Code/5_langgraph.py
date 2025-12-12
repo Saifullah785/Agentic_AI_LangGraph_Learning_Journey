@@ -53,3 +53,15 @@ class UPSCState(TypedDict, total=False):
     overall_feedback: str
     individual_scores: Annotated[List[int], operator.add] # merges parallel lists
     avg_score: float
+
+
+# ------------------------ Tranced node functions ---------------------
+@traceable(name='evaluate_language_fn', tags=['dimension:language'], metadata=['dimension':'language'])
+
+def evaluate_language(state: UPSCState):
+    prompt = (
+        "Evaluate the language quality of the following essay and provide feedback"
+        "and assign a score out of 10.\n\n" + state['essay']
+    )
+    out = structured_model.invoke(prompt)
+    return {'language_feedback': out.feedback, "individual_scores":[out.score]}
