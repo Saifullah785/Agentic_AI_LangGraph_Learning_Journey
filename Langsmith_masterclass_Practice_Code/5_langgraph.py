@@ -65,3 +65,13 @@ def evaluate_language(state: UPSCState):
     )
     out = structured_model.invoke(prompt)
     return {'language_feedback': out.feedback, "individual_scores":[out.score]}
+
+
+@traceable(name='evaluate_analysis_fn', tags=['dimension:analysis'], metadata=['dimension':'analysis'])
+def evaluate_analysis(state: UPSCState):
+    prompt = (
+        "Evaluate the analytical depth of the following essay and provide feedback"
+        "and assign a score out of 10.\n\n" + state['essay']
+    )
+    out = structured_model.invoke(prompt)
+    return {'analysis_feedback': out.feedback, "individual_scores":[out.score]}
