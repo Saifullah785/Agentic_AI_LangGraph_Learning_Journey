@@ -75,3 +75,12 @@ def evaluate_analysis(state: UPSCState):
     )
     out = structured_model.invoke(prompt)
     return {'analysis_feedback': out.feedback, "individual_scores":[out.score]}
+
+@traceable(name='evaluate_thought_fn', tags=['dimension:clarity'], metadata=['dimension':'clarity_of_thought'])
+def evaluate_thought(state: UPSCState):
+    prompt = (
+        "Evaluate the clarity of thought in the following essay and provide feedback"
+        "and assign a score out of 10.\n\n" + state['essay']
+    )
+    out = structured_model.invoke(prompt)
+    return {'clarity_feedback': out.feedback, "individual_scores":[out.score]}
