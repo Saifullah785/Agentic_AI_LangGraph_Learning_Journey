@@ -84,3 +84,18 @@ def evaluate_thought(state: UPSCState):
     )
     out = structured_model.invoke(prompt)
     return {'clarity_feedback': out.feedback, "individual_scores":[out.score]}
+
+@traceable(name='final_evaluation_fn', tags=['aggregate'])
+def final_evaluation(state: UPSCState):
+    prompt = (
+        "Based on the following feebacks, create a summarized overall feedback.\n\n"
+        f" Language Feedback: {state.get('language_feedback','')}\n"
+        f" Depth of Analysis Feedback: {state.get('analysis_feedback','')}\n"
+        f" Clarity of thought Feedback: {state.get('clarity_feedback','')}\n"
+
+    )
+    overall = model.invoke(prompt).content
+    scores = state.get('individual_scores',[]) or []
+    avg = sum(scores)/len(scores) if scores else 0.0
+    return {'overall_feedback': overall, 'avg_score': avg}
+    
