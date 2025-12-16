@@ -98,4 +98,23 @@ def final_evaluation(state: UPSCState):
     scores = state.get('individual_scores',[]) or []
     avg = sum(scores)/len(scores) if scores else 0.0
     return {'overall_feedback': overall, 'avg_score': avg}
-    
+
+
+# ----------------------- Build Graph ----------------------------
+graph = StateGraph(UPSCState)
+
+graph.add_node("evaluate_language", evaluate_language)
+graph.add_node("evaluate_analysis", evaluate_analysis)
+graph.add_node("evaluate_thought", evaluate_thought)
+graph.add_node("final_evaluation", final_evaluation)
+
+# fan-out ->join
+graph.add_edge(START, "evaluate_language")
+graph.add_edge(START, "evaluate_analysis")
+graph.add_edge(START, "evaluate_thought")
+graph.add_edge("evaluate_language", "final_evaluation")
+graph.add_edge("evaluate_analysis", "final_evaluation")
+graph.add_edge("evaluate_thought", "final_evaluation")
+graph.add_edge("final_evaluation", END)
+
+workflow = graph.compile()
