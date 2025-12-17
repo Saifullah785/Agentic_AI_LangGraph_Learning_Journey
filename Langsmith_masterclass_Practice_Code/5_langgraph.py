@@ -118,3 +118,27 @@ graph.add_edge("evaluate_thought", "final_evaluation")
 graph.add_edge("final_evaluation", END)
 
 workflow = graph.compile()
+
+# ---------------------- Direct invoke without wrapper-------------
+
+if __name__ == "__main__":
+    result = workflow.invoke(
+        {'essay': essay2},
+        config={
+            "run_name": "evaluate_upsc_essay", # becomes root run name
+            "tags": ['essay','langgraph','evaluation'],
+            "metadata": {
+                "essay_length": len(essay2),
+                "model": "gpt-4-mini",
+                "dimensions": ["language","analysis","clarity"],
+            },
+        },
+    )
+
+    print("\n== Evaluation Result ==")
+    print("Language Feedback:\n", result.get("language_feedback",""), "\n")
+    print("Analysis Feedback:\n", result.get("analysis_feedback",""), "\n")
+    print("Clarity Feedback:\n", result.get("clarity_feedback",""), "\n")
+    print("Overall Feedback:\n", result.get("overall_feedback",""), "\n")
+    print("Average Score:", result.get("individual_scores", []))
+    print("Average Score:", result.get("avg_score", 0.0))
